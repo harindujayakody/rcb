@@ -63,7 +63,7 @@ Using the principles from `scroll-craft/SKILL.md`:
 
 ```
 01. Navbar         Fixed · Glassmorphic backdrop · Royal Blue `#003580` brand mark · Quote CTA
-02. Hero           Layered Dimensional Stage · Anton Display Headline · Floating Metric Card
+02. Hero           Daylight Architectural Stage · Scroll-Driven Brick-Laying Canvas ("ගල් අල්ලාගෙන එනවා") · Perspective Ground Mapping (Subgrade -> Interlock -> Finished 50 MPa) · Symmetrical Verified Awards Bar (Shramabhimanee 2013 & Co-Sponsor 2016) · OEM Machinery Dock
 03. Marquee        High-contrast royal blue ticker (`PAVING · SDLG · NOAH · HOKANDARA`)
 04. Manifesto      Pinned word scrub reveal on porcelain background
 05. Paving Track   GSAP Pinned horizontal gallery · 5 Architectural Patterns · Spec rows
