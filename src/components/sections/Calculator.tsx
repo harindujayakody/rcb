@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Reveal } from "@/components/motion/reveal";
 import { CountUp } from "@/components/motion/count-up";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,14 +14,19 @@ import {
 } from "@/components/ui/select";
 import { estimatePavers, pavers } from "@/lib/calculator";
 import { site } from "@/lib/site";
-import { ArrowUpRight, Check, Sparkles } from "lucide-react";
+import { ArrowUpRight, Check, Sparkles, ChevronDown } from "lucide-react";
 
 export function Calculator() {
+  const [mounted, setMounted] = useState(false);
   const [length, setLength] = useState<number>(10);
   const [width, setWidth] = useState<number>(6);
   const [unit, setUnit] = useState<"m" | "ft">("m");
   const [paverId, setPaverId] = useState<string>("un2");
   const [waste, setWaste] = useState<number>(5);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const estimate = useMemo(() => {
     return estimatePavers(length, width, unit, paverId, waste);
@@ -108,18 +113,27 @@ export function Calculator() {
                   <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--ink)]">
                     Paver Profile & Depth
                   </label>
-                  <Select value={paverId} onValueChange={setPaverId}>
-                    <SelectTrigger className="w-full bg-white border-[var(--line-light)] text-[var(--ink)] font-medium h-[42px] focus:ring-[var(--safety)]" suppressHydrationWarning>
-                      <SelectValue placeholder="Select block profile" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-[var(--line-light)] text-[var(--ink)]">
-                      {pavers.map((p) => (
-                        <SelectItem key={p.id} value={p.id} className="font-medium">
-                          {p.name} ({p.depth}mm Depth · {p.length}×{p.width}mm)
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {mounted ? (
+                    <Select value={paverId} onValueChange={setPaverId}>
+                      <SelectTrigger className="w-full bg-white border-[var(--line-light)] text-[var(--ink)] font-medium h-[42px] focus:ring-[var(--safety)]" suppressHydrationWarning>
+                        <SelectValue placeholder="Select block profile" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-[var(--line-light)] text-[var(--ink)]">
+                        {pavers.map((p) => (
+                          <SelectItem key={p.id} value={p.id} className="font-medium">
+                            {p.name} ({p.depth}mm Depth · {p.length}×{p.width}mm)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="w-full bg-white border border-[var(--line-light)] text-[var(--ink)] font-medium h-[42px] rounded-lg px-3 flex items-center justify-between shadow-xs">
+                      <span className="text-sm">
+                        {selectedPaver.name} ({selectedPaver.depth}mm Depth · {selectedPaver.length}×{selectedPaver.width}mm)
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </div>
+                  )}
                 </div>
               </div>
 
