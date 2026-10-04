@@ -71,14 +71,14 @@ export function Calculator() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Controls Card (Light surface) */}
           <Card className="lg:col-span-7 bg-[var(--paper)] border-[var(--line-light)] shadow-xl rounded-2xl">
-            <CardContent className="p-8 sm:p-10 space-y-8">
+            <CardContent className="p-8 sm:p-10 space-y-8" suppressHydrationWarning>
               {/* Unit Toggle & Paver Type */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6" suppressHydrationWarning>
+                <div className="space-y-2" suppressHydrationWarning>
                   <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--ink)]">
                     Measurement Unit
                   </label>
-                  <div className="flex rounded-lg border border-[var(--line-light)] p-1 bg-white">
+                  <div className="flex rounded-lg border border-[var(--line-light)] p-1 bg-white" suppressHydrationWarning>
                     <button
                       type="button"
                       onClick={() => setUnit("m")}
@@ -104,12 +104,12 @@ export function Calculator() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2" suppressHydrationWarning>
                   <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--ink)]">
                     Paver Profile & Depth
                   </label>
                   <Select value={paverId} onValueChange={setPaverId}>
-                    <SelectTrigger className="w-full bg-white border-[var(--line-light)] text-[var(--ink)] font-medium h-[42px] focus:ring-[var(--safety)]">
+                    <SelectTrigger className="w-full bg-white border-[var(--line-light)] text-[var(--ink)] font-medium h-[42px] focus:ring-[var(--safety)]" suppressHydrationWarning>
                       <SelectValue placeholder="Select block profile" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-[var(--line-light)] text-[var(--ink)]">

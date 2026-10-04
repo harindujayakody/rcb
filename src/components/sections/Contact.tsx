@@ -154,9 +154,9 @@ export function Contact() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
+              <form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6" suppressHydrationWarning>
+                  <div className="space-y-2" suppressHydrationWarning>
                     <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--steel)]">
                       Your Name
                     </label>
@@ -164,6 +164,7 @@ export function Contact() {
                       required
                       placeholder="e.g. Kasun Silva"
                       value={formState.name}
+                      suppressHydrationWarning
                       onChange={(e) =>
                         setFormState({ ...formState, name: e.target.value })
                       }
@@ -171,7 +172,7 @@ export function Contact() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2" suppressHydrationWarning>
                     <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--steel)]">
                       Phone Number
                     </label>
@@ -180,6 +181,7 @@ export function Contact() {
                       type="tel"
                       placeholder="e.g. +94 77 123 4567"
                       value={formState.phone}
+                      suppressHydrationWarning
                       onChange={(e) =>
                         setFormState({ ...formState, phone: e.target.value })
                       }
@@ -188,12 +190,13 @@ export function Contact() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2" suppressHydrationWarning>
                   <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--steel)]">
                     Area of Interest
                   </label>
                   <select
                     value={formState.interest}
+                    suppressHydrationWarning
                     onChange={(e) =>
                       setFormState({ ...formState, interest: e.target.value })
                     }
@@ -220,7 +223,7 @@ export function Contact() {
                   </select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2" suppressHydrationWarning>
                   <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--steel)]">
                     Project Details / Approximate Quantity
                   </label>
@@ -228,6 +231,7 @@ export function Contact() {
                     rows={4}
                     placeholder="Tell us about your project location, timeline, and machinery or paving volume..."
                     value={formState.message}
+                    suppressHydrationWarning
                     onChange={(e) =>
                       setFormState({ ...formState, message: e.target.value })
                     }
