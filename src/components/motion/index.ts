@@ -7,3 +7,4 @@ export { CountUp } from "./count-up";
 export { Magnetic } from "./magnetic";
 export { HorizontalScroll } from "./horizontal-scroll";
 export { CompareSlider } from "./compare-slider";
+export { ScrubVideo, TOTAL_HERO_FRAMES } from "./ScrubVideo";
