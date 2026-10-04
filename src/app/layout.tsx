@@ -1,40 +1,58 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Anton, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import "./site.css";
-import { Footer } from "@/components/footer";
+import { Providers } from "./providers";
 
-const googleSans = localFont({
-  src: "./fonts/google-sans-flex.woff2",
-  variable: "--font-google",
+const anton = Anton({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-anton",
   display: "swap",
-  weight: "400 800",
 });
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "RCB Holdings | Interlock Paving & Construction Machinery Sri Lanka",
+  title: "RCB Holdings | Industrial Interlock Paving & Machinery Sri Lanka",
   description:
-    "Explore interlock paving, cement blocks and construction machinery from RCB Holdings, Sri Lanka. Plan your paving with our brick calculator and talk to our team.",
+    "Engineering-grade interlock paving, cement blocks and heavy construction machinery from RCB Holdings, Sri Lanka. SDLG, Yineng, Noah, and Shengya authorized distributor.",
   metadataBase: new URL("https://rcb.lk"),
   openGraph: {
-    title: "RCB Holdings — Build something that lasts.",
+    title: "RCB Holdings — Build Something That Lasts.",
     description:
-      "Interlock paving and construction machinery for your next project.",
+      "Engineering-grade interlock paving and heavy construction machinery in Sri Lanka.",
     type: "website",
     locale: "en_LK",
-    images: [{ url: "/ip.jpg", width: 590, height: 340 }],
+    images: [{ url: "/paving-after.webp", width: 1200, height: 630 }],
   },
 };
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={googleSans.variable} suppressHydrationWarning>
-      <body suppressHydrationWarning>
-        <a href="#main" className="skip-link">
+    <html
+      lang="en"
+      className={`${anton.variable} ${inter.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="bg-[var(--ink)] text-[var(--paper)] font-sans antialiased selection:bg-[var(--safety)] selection:text-[var(--safety-ink)]" suppressHydrationWarning>
+        <a href="#main" className="skip-link sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-[var(--safety)] focus:text-[var(--safety-ink)] focus:px-4 focus:py-2 focus:font-mono focus:text-xs">
           Skip to content
         </a>
-        {children}
-        <Footer />
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
