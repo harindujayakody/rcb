@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import { useScroll, useMotionValueEvent, useReducedMotion } from "motion/react";
 import {
   Calculator,
   Wrench,
@@ -9,7 +10,6 @@ import {
   ArrowDown,
   Play,
   Pause,
-  Award,
 } from "lucide-react";
 import { Magnetic } from "@/components/motion/magnetic";
 import { Awards } from "@/components/brand";
@@ -19,8 +19,8 @@ const clamp = (value: number) => Math.min(1, Math.max(0, value));
 const rows = 8;
 const columns = 14;
 
-// Perspective mapping for Sri Lankan courtyard ground in paving-before / paving-after
-// Villa portico & tropical landscape sit in the top 44%; ground extends from 0.44 to 1.00
+// Perspective mapping for Sri Lankan estate courtyard ground (paving-before / paving-after)
+// Tropical villa portico & landscape sit in the top 44%; ground extends from 0.44 to 1.00
 const groundStart = 0.44;
 const groundEnd = 1.0;
 
@@ -34,7 +34,7 @@ const blocks = Array.from({ length: rows * columns }, (_, index) => {
   const top = groundStart + tTop * (groundEnd - groundStart);
   const bottom = groundStart + tBottom * (groundEnd - groundStart);
 
-  // Perspective width factor: ground is narrower near the portico and spans full width at the bottom
+  // Perspective width factor: ground is narrower near portico and spans full width at bottom
   const rowProgress = (row + 0.5) / rows;
   const widthFactor = 0.82 + rowProgress * 0.18;
   const rowMargin = (1 - widthFactor) / 2;
@@ -47,7 +47,7 @@ const blocks = Array.from({ length: rows * columns }, (_, index) => {
   const left = rowMargin + leftNorm * widthFactor;
   const right = rowMargin + rightNorm * widthFactor;
 
-  // Dynamic stone arrival order: starts near villa entrance and sweeps outward into foreground
+  // Dynamic stone arrival order: begins near villa entrance and sweeps outward into foreground
   const centerDelta = Math.abs(col - (columns / 2 - 0.5)) / (columns / 2);
   const start = 0.05 + (row / rows) * 0.62 + centerDelta * 0.18;
 
@@ -75,24 +75,39 @@ export function Hero() {
   const sceneRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Direct DOM refs to avoid React re-render churn during continuous 60fps canvas scrub
+  const statusBadgeRef = useRef<HTMLSpanElement>(null);
+  const statusDotRef = useRef<HTMLSpanElement>(null);
+
+  const prefersReduced = useReducedMotion();
   const [paused, setPaused] = useState(false);
   const [ready, setReady] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
   const [hoveredBlockInfo, setHoveredBlockInfo] = useState<string | null>(null);
-  const [currentProgress, setCurrentProgress] = useState(0);
+
+  // Target progress ref updated via Motion's useScroll
+  const targetProgressRef = useRef(0);
+  const currentProgressRef = useRef(0);
+
+  // Motion-driven scroll tracking (Zero window.addEventListener scroll leaks)
+  const { scrollYProgress } = useScroll({
+    target: showcaseTrackRef,
+    offset: ["start 84px", "end end"],
+  });
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (prefersReduced || paused) return;
+    targetProgressRef.current = clamp(0.04 + latest * 1.2);
+  });
 
   // Canvas brick assembly render loop
   useEffect(() => {
-    const track = showcaseTrackRef.current;
-    const pin = cardPinRef.current;
     const scene = sceneRef.current;
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
-    if (!track || !pin || !scene || !canvas || !context) return;
+    if (!scene || !canvas || !context) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const mobile = window.matchMedia("(max-width: 768px)");
 
     const before = new window.Image();
     const after = new window.Image();
@@ -104,31 +119,41 @@ export function Hero() {
     let loaded = false;
     let width = 0;
     let height = 0;
-    let progress = 0;
-    let targetProgress = 0;
 
     const paint = () => {
       frame = 0;
       if (!loaded || disposed || !width || !height) return;
 
-      const still = reduced.matches || paused;
+      const still = prefersReduced || paused;
+      const target = still ? 1 : targetProgressRef.current;
+
       if (still) {
-        progress = targetProgress;
+        currentProgressRef.current = target;
       } else {
-        progress += (targetProgress - progress) * 0.14;
-        if (Math.abs(targetProgress - progress) < 0.001) progress = targetProgress;
+        currentProgressRef.current += (target - currentProgressRef.current) * 0.14;
+        if (Math.abs(target - currentProgressRef.current) < 0.001) {
+          currentProgressRef.current = target;
+        }
       }
 
-      setCurrentProgress(progress);
+      const p = currentProgressRef.current;
 
-      // Determine active stage
-      if (progress < 0.3) {
-        setActiveStage(0);
-      } else if (progress < 0.85) {
-        setActiveStage(1);
-      } else {
-        setActiveStage(2);
+      // Update lightweight DOM indicators directly without triggering full React tree re-renders
+      if (statusBadgeRef.current) {
+        statusBadgeRef.current.textContent =
+          p >= 0.95
+            ? "HERRINGBONE LOCKED (100%)"
+            : `ASSEMBLING: ${Math.round(p * 100)}%`;
       }
+      if (statusDotRef.current) {
+        statusDotRef.current.className = `w-2 h-2 rounded-xs ${
+          p >= 0.95 ? "bg-emerald-500" : "bg-[#003580] animate-pulse"
+        }`;
+      }
+
+      // Sync active stage button state
+      const nextStage = p < 0.3 ? 0 : p < 0.85 ? 1 : 2;
+      setActiveStage((prev) => (prev !== nextStage ? nextStage : prev));
 
       const scale = Math.max(width / after.naturalWidth, height / after.naturalHeight);
       const imageWidth = after.naturalWidth * scale;
@@ -145,15 +170,14 @@ export function Hero() {
       drawPhoto(before);
 
       // 2. Draw dynamic interlocking bricks locking into place ("ගල් අල්ලාගෙන එනවා")
-      if (progress >= 0.98) {
-        // Complete seamless finished pavement
+      if (p >= 0.98) {
         drawPhoto(after);
       } else {
         for (const block of blocks) {
-          const amount = clamp((progress - block.start) / 0.14);
+          const amount = clamp((p - block.start) / 0.14);
           if (amount === 0) {
-            // Brick hasn't arrived yet: draw faint blueprint chalk outline on ground
-            if (progress > 0.08 && progress < 0.45) {
+            // Unplaced stone: draw subtle blueprint guide on ground
+            if (p > 0.08 && p < 0.45) {
               const bx = imageX + block.left * imageWidth;
               const by = imageY + block.top * imageHeight;
               const bw = (block.right - block.left) * imageWidth;
@@ -167,7 +191,7 @@ export function Hero() {
             continue;
           }
 
-          // Cubic ease-out drop motion for stone placement
+          // Cubic ease-out kinetic drop motion for stone placement
           const eased = 1 - Math.pow(1 - amount, 3);
           const bx = imageX + block.left * imageWidth;
           const by = imageY + block.top * imageHeight;
@@ -213,7 +237,7 @@ export function Hero() {
               px < b.right &&
               py >= b.top &&
               py < b.bottom &&
-              progress > b.start
+              p > b.start
           );
 
           if (hoveredBlock) {
@@ -222,7 +246,7 @@ export function Hero() {
             const hw = (hoveredBlock.right - hoveredBlock.left) * imageWidth;
             const hh = (hoveredBlock.bottom - hoveredBlock.top) * imageHeight;
 
-            // Crisp architectural precision highlight
+            // Precision architectural highlight
             context.fillStyle = "rgba(0, 53, 128, 0.16)";
             context.strokeStyle = "#003580";
             context.lineWidth = 2;
@@ -232,8 +256,8 @@ export function Hero() {
         }
       }
 
-      const settling = Math.abs(targetProgress - progress) > 0.001;
-      if (settling && visible && !still && !document.hidden) {
+      const settling = Math.abs(target - p) > 0.001;
+      if ((settling || !still) && visible && !document.hidden) {
         frame = requestAnimationFrame(paint);
       }
     };
@@ -244,19 +268,6 @@ export function Hero() {
       }
     };
 
-    const updateFromScroll = () => {
-      if (!visible || document.hidden) return;
-      const bounds = track.getBoundingClientRect();
-      const distance = mobile.matches
-        ? Math.max(300, bounds.height * 0.6)
-        : Math.max(1, bounds.height - (pin.offsetHeight || window.innerHeight - 84));
-
-      // Scroll progress mapping: starts as track approaches top
-      const scrolled = clamp((84 - bounds.top) / distance);
-      targetProgress = reduced.matches || paused ? 1 : clamp(0.04 + scrolled * 1.2);
-      schedule();
-    };
-
     const resize = () => {
       const rect = scene.getBoundingClientRect();
       width = rect.width;
@@ -265,17 +276,16 @@ export function Hero() {
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
-      updateFromScroll();
+      schedule();
     };
 
     const onPointerMove = (event: PointerEvent) => {
-      if (!finePointer.matches || reduced.matches) return;
+      if (!finePointer.matches || prefersReduced) return;
       const bounds = scene.getBoundingClientRect();
       pointer.x = clamp((event.clientX - bounds.left) / bounds.width);
       pointer.y = clamp((event.clientY - bounds.top) / bounds.height);
       pointer.active = true;
 
-      // Check hovered block specification
       const imageScale = Math.max(bounds.width / 1920, bounds.height / 1080);
       const imgW = 1920 * imageScale;
       const imgH = 1080 * imageScale;
@@ -291,7 +301,7 @@ export function Hero() {
             px < b.right &&
             py >= b.top &&
             py < b.bottom &&
-            progress > b.start
+            currentProgressRef.current > b.start
         );
         if (found) {
           setHoveredBlockInfo(
@@ -320,14 +330,14 @@ export function Hero() {
         cancelAnimationFrame(frame);
         frame = 0;
       } else {
-        updateFromScroll();
+        schedule();
       }
     };
 
     const resizeObserver = new ResizeObserver(resize);
     const visibilityObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
-      if (visible) updateFromScroll();
+      if (visible) schedule();
       else {
         cancelAnimationFrame(frame);
         frame = 0;
@@ -342,7 +352,7 @@ export function Hero() {
         if (disposed) return;
         loaded = true;
         resize();
-        progress = reduced.matches || paused ? 1 : targetProgress;
+        currentProgressRef.current = prefersReduced || paused ? 1 : targetProgressRef.current;
         paint();
         setReady(true);
       })
@@ -351,27 +361,21 @@ export function Hero() {
       });
 
     resizeObserver.observe(scene);
-    visibilityObserver.observe(track);
-    window.addEventListener("scroll", updateFromScroll, { passive: true });
+    visibilityObserver.observe(scene);
     scene.addEventListener("pointermove", onPointerMove, { passive: true });
     scene.addEventListener("pointerleave", onPointerLeave);
     document.addEventListener("visibilitychange", onVisibility);
-    reduced.addEventListener("change", updateFromScroll);
-    mobile.addEventListener("change", resize);
 
     return () => {
       disposed = true;
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
-      window.removeEventListener("scroll", updateFromScroll);
       scene.removeEventListener("pointermove", onPointerMove);
       scene.removeEventListener("pointerleave", onPointerLeave);
       document.removeEventListener("visibilitychange", onVisibility);
-      reduced.removeEventListener("change", updateFromScroll);
-      mobile.removeEventListener("change", resize);
     };
-  }, [paused]);
+  }, [paused, prefersReduced]);
 
   const selectStage = (index: number) => {
     setActiveStage(index);
@@ -390,23 +394,21 @@ export function Hero() {
 
     window.scrollTo({
       top: scrollTarget,
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "instant"
-        : "smooth",
+      behavior: prefersReduced ? "instant" : "smooth",
     });
   };
 
   return (
     <section
       id="hero"
-      className="relative bg-[var(--canvas)] text-[var(--ink)] select-none pt-24 sm:pt-28 lg:pt-32 pb-16 lg:pb-24 border-b border-[var(--border)]"
+      className="relative bg-[var(--canvas)] text-[var(--ink)] select-none pt-20 lg:pt-24 pb-16 lg:pb-24 border-b border-[var(--border)]"
       aria-label="RCB Holdings Engineering Hero"
     >
-      {/* 1. Daylight Architectural Header (In normal document flow: Never clips!) */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mb-8 sm:mb-12">
+      {/* 1. Daylight Architectural Header (Strictly under max pt-24 cap, fits initial viewport) */}
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-end">
           
-          {/* Left Column: Eyebrow + Monumental Headline + Subline */}
+          {/* Left Column: Eyebrow + Monumental Headline + Crisp Subline (≤20 words) */}
           <div className="lg:col-span-7">
             {/* Technical Credential Badge (Strictly zero pills: rounded-md) */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#EBF3FF] border border-[#003580]/20 text-[#003580] mb-3 sm:mb-4 shadow-xs">
@@ -416,21 +418,21 @@ export function Hero() {
               </span>
             </div>
 
-            {/* Monumental Headline */}
+            {/* Monumental Headline (Max 2 lines) */}
             <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] tracking-tight leading-[0.94] text-[#0A1128] mb-3 sm:mb-4">
               BUILD SOMETHING <br />
               <span className="text-[#003580]">THAT LASTS.</span>
             </h1>
 
+            {/* High-Impact Subtext (Strictly 17 words, max 20 words constraint) */}
             <p className="text-sm sm:text-base md:text-lg text-slate-700 max-w-2xl font-sans leading-relaxed">
-              Precision interlock paving manufactured to Sri Lanka’s highest compressive standards.
-              Authorized distributor for SDLG, Noah &amp; Shengya heavy construction machinery island-wide.
+              Precision interlock paving engineered to high compressive standards. Island-wide heavy machinery distribution for SDLG, Noah &amp; Shengya.
             </p>
           </div>
 
           {/* Right Column: High-Impact Action CTAs + Symmetrical Awards Bar */}
-          <div className="lg:col-span-5 flex flex-col items-start lg:items-end gap-4">
-            {/* CTAs (Strictly zero pills: rounded-lg) */}
+          <div className="lg:col-span-5 flex flex-col items-start lg:items-end gap-3.5">
+            {/* CTAs (Strictly zero pills: rounded-lg, labels ≤ 3 words) */}
             <div className="flex flex-wrap items-center gap-3 w-full lg:justify-end">
               <Magnetic strength={0.2}>
                 <a
@@ -454,7 +456,7 @@ export function Hero() {
             </div>
 
             {/* Symmetrical Hero Awards Bar (Light theme with laurel emblems) */}
-            <div className="w-full lg:max-w-md pt-1">
+            <div className="w-full lg:max-w-md pt-0.5">
               <Awards theme="light" />
             </div>
           </div>
@@ -462,16 +464,16 @@ export function Hero() {
         </div>
       </div>
 
-      {/* 2. Pinned Monumental Showcase Card Track (Scroll-Driven "ගල් අල්ලාගෙන එනවා") */}
+      {/* 2. Pinned Monumental Showcase Card Track (Motion-Scrubbed "ගල් අල්ලාගෙන එනවා") */}
       <div
         ref={showcaseTrackRef}
         className="relative max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8"
         style={{ minHeight: "170vh" }}
       >
-        {/* Sticky Showcase Card */}
+        {/* Sticky Showcase Card (Architectural radius, strictly zero pills: rounded-2xl lg:rounded-3xl) */}
         <div
           ref={cardPinRef}
-          className="sticky top-[84px] w-full rounded-2xl lg:rounded-3xl border border-slate-200/90 bg-slate-900 shadow-[0_25px_60px_-15px_rgba(0,53,128,0.12)] overflow-hidden h-[540px] sm:h-[620px] lg:h-[680px] flex flex-col justify-between"
+          className="sticky top-[84px] w-full rounded-2xl lg:rounded-3xl border border-slate-200/90 bg-slate-900 shadow-[0_25px_60px_-15px_rgba(0,53,128,0.12)] overflow-hidden h-[520px] sm:h-[600px] lg:h-[660px] flex flex-col justify-between"
         >
           {/* Canvas Scene Frame */}
           <div
@@ -597,14 +599,10 @@ export function Hero() {
               </button>
             </div>
 
-            {/* Overlaid Bottom-Right Live Kinetic Status Indicator */}
+            {/* Overlaid Bottom-Right Live Kinetic Status Indicator (Ref-driven to prevent React churn) */}
             <div className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md flex items-center gap-2 font-mono text-[10px] sm:text-[11px] font-semibold text-[#0A1128]">
-              <span className={`w-2 h-2 rounded-xs ${currentProgress >= 0.95 ? "bg-emerald-500" : "bg-[#003580] animate-pulse"}`} />
-              <span>
-                {currentProgress >= 0.95
-                  ? "HERRINGBONE LOCKED (100%)"
-                  : `ASSEMBLING: ${Math.round(currentProgress * 100)}%`}
-              </span>
+              <span ref={statusDotRef} className="w-2 h-2 rounded-xs bg-[#003580] animate-pulse" />
+              <span ref={statusBadgeRef}>ASSEMBLING: 0%</span>
             </div>
           </div>
 
