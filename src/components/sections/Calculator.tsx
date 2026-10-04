@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { estimatePavers, pavers } from "@/lib/calculator";
 import { site } from "@/lib/site";
-import { ArrowUpRight, Check, Sparkles, ChevronDown } from "lucide-react";
+import { ArrowUpRight, ChevronDown } from "lucide-react";
 
 export function Calculator() {
   const [mounted, setMounted] = useState(false);
@@ -44,16 +44,16 @@ export function Calculator() {
   return (
     <section
       id="calculator"
-      className="relative py-28 md:py-36 bg-[var(--concrete)] text-[var(--slate)] border-y border-[var(--line-light)]"
+      className="relative py-28 md:py-36 bg-[var(--canvas-subtle)] text-[var(--ink)] border-t border-slate-200/80"
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-14">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Section Header */}
         <div className="max-w-3xl mb-12">
           <Reveal y={15}>
             <div className="flex items-center gap-3 mb-3">
-              <span className="w-5 h-[2px] bg-[var(--safety-ink)] inline-block" />
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--safety-ink)] font-bold">
-                04 — MATERIAL ESTIMATOR
+              <span className="w-5 h-[2.5px] bg-[var(--theme)] inline-block" />
+              <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--theme)] font-bold">
+                04 — MATERIAL QUANTITY ESTIMATOR
               </span>
             </div>
           </Reveal>
@@ -65,7 +65,7 @@ export function Calculator() {
           </Reveal>
 
           <Reveal delay={0.2} y={20}>
-            <p className="text-base sm:text-lg text-[var(--slate)] font-body leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 font-body leading-relaxed">
               Calculate accurate block quantities, surface area, and cutting allowances
               calibrated specifically for Sri Lankan project requirements.
             </p>
@@ -74,23 +74,23 @@ export function Calculator() {
 
         {/* Calculator Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Controls Card (Light surface) */}
-          <Card className="lg:col-span-7 bg-[var(--paper)] border-[var(--line-light)] shadow-xl rounded-2xl">
+          {/* Left Controls Card (Light Surface) */}
+          <Card className="lg:col-span-7 bg-white border-slate-200 shadow-md rounded-2xl">
             <CardContent className="p-8 sm:p-10 space-y-8" suppressHydrationWarning>
               {/* Unit Toggle & Paver Type */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6" suppressHydrationWarning>
                 <div className="space-y-2" suppressHydrationWarning>
-                  <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--ink)]">
+                  <label className="font-mono text-xs font-bold uppercase tracking-wider text-slate-700">
                     Measurement Unit
                   </label>
-                  <div className="flex rounded-lg border border-[var(--line-light)] p-1 bg-white" suppressHydrationWarning>
+                  <div className="flex rounded-lg border border-slate-200 p-1 bg-slate-50" suppressHydrationWarning>
                     <button
                       type="button"
                       onClick={() => setUnit("m")}
                       className={`flex-1 py-2 font-mono text-xs uppercase tracking-wider rounded-md transition-all ${
                         unit === "m"
-                          ? "bg-[var(--ink)] text-white font-bold shadow-sm"
-                          : "text-[var(--slate)] hover:text-black"
+                          ? "bg-[var(--theme)] text-white font-bold shadow-xs"
+                          : "text-slate-600 hover:text-slate-900"
                       }`}
                     >
                       Metres (m)
@@ -100,8 +100,8 @@ export function Calculator() {
                       onClick={() => setUnit("ft")}
                       className={`flex-1 py-2 font-mono text-xs uppercase tracking-wider rounded-md transition-all ${
                         unit === "ft"
-                          ? "bg-[var(--ink)] text-white font-bold shadow-sm"
-                          : "text-[var(--slate)] hover:text-black"
+                          ? "bg-[var(--theme)] text-white font-bold shadow-xs"
+                          : "text-slate-600 hover:text-slate-900"
                       }`}
                     >
                       Feet (ft)
@@ -110,15 +110,15 @@ export function Calculator() {
                 </div>
 
                 <div className="space-y-2" suppressHydrationWarning>
-                  <label className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--ink)]">
+                  <label className="font-mono text-xs font-bold uppercase tracking-wider text-slate-700">
                     Paver Profile & Depth
                   </label>
                   {mounted ? (
                     <Select value={paverId} onValueChange={setPaverId}>
-                      <SelectTrigger className="w-full bg-white border-[var(--line-light)] text-[var(--ink)] font-medium h-[42px] focus:ring-[var(--safety)]" suppressHydrationWarning>
+                      <SelectTrigger className="w-full bg-slate-50 border-slate-200 text-slate-900 font-medium h-[42px] focus:ring-[var(--theme)] rounded-lg" suppressHydrationWarning>
                         <SelectValue placeholder="Select block profile" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-[var(--line-light)] text-[var(--ink)]">
+                      <SelectContent className="bg-white border-slate-200 text-slate-900 rounded-lg">
                         {pavers.map((p) => (
                           <SelectItem key={p.id} value={p.id} className="font-medium">
                             {p.name} ({p.depth}mm Depth · {p.length}×{p.width}mm)
@@ -127,11 +127,11 @@ export function Calculator() {
                       </SelectContent>
                     </Select>
                   ) : (
-                    <div className="w-full bg-white border border-[var(--line-light)] text-[var(--ink)] font-medium h-[42px] rounded-lg px-3 flex items-center justify-between shadow-xs">
+                    <div className="w-full bg-slate-50 border border-slate-200 text-slate-900 font-medium h-[42px] rounded-lg px-3 flex items-center justify-between shadow-xs">
                       <span className="text-sm">
                         {selectedPaver.name} ({selectedPaver.depth}mm Depth · {selectedPaver.length}×{selectedPaver.width}mm)
                       </span>
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
                     </div>
                   )}
                 </div>
@@ -140,10 +140,10 @@ export function Calculator() {
               {/* Length Slider */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between font-mono text-xs">
-                  <span className="font-bold text-[var(--ink)] uppercase tracking-wider">
+                  <span className="font-bold text-slate-700 uppercase tracking-wider">
                     Project Length
                   </span>
-                  <span className="px-3 py-1 bg-white border border-[var(--line-light)] rounded font-bold text-sm text-[var(--ink)]">
+                  <span className="px-3 py-1 bg-slate-100 border border-slate-200 rounded-md font-bold text-sm text-[var(--theme)]">
                     {length} {unit}
                   </span>
                 </div>
@@ -160,10 +160,10 @@ export function Calculator() {
               {/* Width Slider */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between font-mono text-xs">
-                  <span className="font-bold text-[var(--ink)] uppercase tracking-wider">
+                  <span className="font-bold text-slate-700 uppercase tracking-wider">
                     Project Width
                   </span>
-                  <span className="px-3 py-1 bg-white border border-[var(--line-light)] rounded font-bold text-sm text-[var(--ink)]">
+                  <span className="px-3 py-1 bg-slate-100 border border-slate-200 rounded-md font-bold text-sm text-[var(--theme)]">
                     {width} {unit}
                   </span>
                 </div>
@@ -180,10 +180,10 @@ export function Calculator() {
               {/* Cutting Allowance Slider */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between font-mono text-xs">
-                  <span className="font-bold text-[var(--ink)] uppercase tracking-wider">
+                  <span className="font-bold text-slate-700 uppercase tracking-wider">
                     Cutting & Edge Wastage Allowance
                   </span>
-                  <span className="px-3 py-1 bg-white border border-[var(--line-light)] rounded font-bold text-sm text-[var(--ink)]">
+                  <span className="px-3 py-1 bg-slate-100 border border-slate-200 rounded-md font-bold text-sm text-[var(--theme)]">
                     {waste}%
                   </span>
                 </div>
@@ -195,32 +195,32 @@ export function Calculator() {
                   onValueChange={(val) => setWaste(val[0])}
                   className="py-2"
                 />
-                <p className="font-mono text-[11px] text-[var(--slate)]">
+                <p className="font-mono text-[11px] text-slate-500 font-medium">
                   Standard recommendation: 5% for rectangular areas, 8–10% for curved borders.
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Right Live Results Card (Dark Industrial Surface) */}
-          <Card className="lg:col-span-5 bg-[var(--ink)] text-[var(--paper)] border-[var(--line-dark)] shadow-2xl rounded-2xl lg:sticky lg:top-28 overflow-hidden">
+          {/* Right Live Results Card (Royal Blue Anchor #003580) */}
+          <Card className="lg:col-span-5 bg-[var(--theme)] text-white border-blue-900/50 shadow-2xl rounded-2xl lg:sticky lg:top-24 overflow-hidden">
             <CardContent className="p-8 sm:p-10 space-y-8">
-              <div className="flex items-center justify-between border-b border-[var(--line-dark)] pb-4 font-mono text-xs text-[var(--steel)]">
+              <div className="flex items-center justify-between border-b border-white/20 pb-4 font-mono text-xs text-sky-200">
                 <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-none bg-[var(--safety)] inline-block" />
+                  <span className="w-2 h-2 rounded-xs bg-white inline-block" />
                   ESTIMATED QUANTITY
                 </span>
-                <span className="text-[var(--safety)] font-bold">
+                <span className="text-white font-bold">
                   {selectedPaver.name} · {selectedPaver.depth}MM
                 </span>
               </div>
 
               {/* Giant Anton Block Count */}
               <div>
-                <div className="font-mono text-xs text-[var(--steel)] uppercase tracking-widest mb-1">
+                <div className="font-mono text-xs text-sky-200 uppercase tracking-widest mb-1 font-semibold">
                   TOTAL ESTIMATED BLOCKS
                 </div>
-                <div className="font-display text-6xl sm:text-7xl lg:text-8xl text-[var(--paper)] leading-none tracking-tight">
+                <div className="font-display text-6xl sm:text-7xl lg:text-8xl text-white leading-none tracking-tight">
                   {estimate?.total ? (
                     <CountUp value={estimate.total} duration={1.2} />
                   ) : (
@@ -230,44 +230,44 @@ export function Calculator() {
               </div>
 
               {/* Breakdown Grid */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[var(--line-dark)] font-mono text-xs">
-                <div className="p-3.5 rounded-lg bg-[var(--graphite)] border border-[var(--line-dark)]">
-                  <div className="text-[var(--steel)] uppercase mb-1">Coverage Area</div>
-                  <div className="font-display text-xl text-[var(--paper)]">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/20 font-mono text-xs">
+                <div className="p-3.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/15">
+                  <div className="text-sky-200 uppercase mb-1">Coverage Area</div>
+                  <div className="font-display text-xl text-white">
                     {estimate?.area.toFixed(1)} m²
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-lg bg-[var(--graphite)] border border-[var(--line-dark)]">
-                  <div className="text-[var(--steel)] uppercase mb-1">Waste Reserve</div>
-                  <div className="font-display text-xl text-[var(--safety)]">
+                <div className="p-3.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/15">
+                  <div className="text-sky-200 uppercase mb-1">Waste Reserve</div>
+                  <div className="font-display text-xl text-sky-300">
                     +{estimate?.extra.toLocaleString()} units
                   </div>
                 </div>
               </div>
 
-              {/* Visual Density Progress Bar */}
+              {/* Visual Density Progress Bar (Zero pills: rounded-md) */}
               <div className="space-y-2">
-                <div className="flex justify-between font-mono text-[11px] text-[var(--steel)]">
+                <div className="flex justify-between font-mono text-[11px] text-sky-200">
                   <span>BASE: {estimate?.base.toLocaleString()}</span>
                   <span>+{waste}% CUTTING</span>
                 </div>
-                <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden flex">
-                  <div className="bg-[var(--paper)] h-full transition-all duration-300" style={{ width: `${100 - waste * 3}%` }} />
-                  <div className="bg-[var(--safety)] h-full transition-all duration-300" style={{ width: `${waste * 3}%` }} />
+                <div className="w-full h-3 bg-white/20 rounded-md overflow-hidden flex">
+                  <div className="bg-white h-full transition-all duration-300" style={{ width: `${100 - waste * 3}%` }} />
+                  <div className="bg-sky-300 h-full transition-all duration-300" style={{ width: `${waste * 3}%` }} />
                 </div>
               </div>
 
               {/* CTA Button */}
               <a
                 href={mailtoHref}
-                className="w-full py-4 rounded-xl bg-[var(--safety)] text-[var(--safety-ink)] font-mono text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-xl active:scale-98"
+                className="w-full py-4 rounded-xl bg-white text-[var(--theme)] font-mono text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 hover:bg-slate-100 transition-all shadow-md active:scale-98"
               >
                 <span>DISCUSS THIS ESTIMATE WITH RCB</span>
                 <ArrowUpRight className="w-4 h-4" />
               </a>
 
-              <p className="font-mono text-[10px] text-[var(--steel)] text-center leading-relaxed">
+              <p className="font-mono text-[10px] text-sky-200/80 text-center leading-relaxed">
                 * Quantities calculated mathematically based on block dimensions.
                 Site contours and edge cutting may require minor on-site adjustment.
               </p>

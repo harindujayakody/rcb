@@ -17,7 +17,7 @@ import { Footer } from "@/components/sections/Footer";
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-[var(--ink)] text-[var(--paper)] flex flex-col selection:bg-[var(--safety)] selection:text-[var(--safety-ink)]">
+    <div className="relative min-h-screen bg-[var(--canvas)] text-[var(--ink)] flex flex-col selection:bg-[var(--theme)] selection:text-white">
       {/* 0. Preloader */}
       <Preloader />
 

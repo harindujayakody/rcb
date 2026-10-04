@@ -1,3 +1,5 @@
+import React from "react";
+
 export function Brand({ light = false }: { light?: boolean }) {
   return (
     <a
@@ -9,6 +11,7 @@ export function Brand({ light = false }: { light?: boolean }) {
     </a>
   );
 }
+
 export function AppleLaurelBranch({
   side = "left",
   className = "",
@@ -127,7 +130,7 @@ export function AppleLaurelBranch({
 export function AwardEmblem({ className = "" }: { className?: string }) {
   return (
     <svg
-      className={`apple-award-emblem ${className}`.trim()}
+      className={`w-3.5 h-3.5 ${className}`.trim()}
       viewBox="0 0 24 24"
       fill="currentColor"
       aria-hidden="true"
@@ -143,37 +146,71 @@ export function AppleAwardBadge({
   href,
   className = "",
   size = "md",
+  theme = "light",
 }: {
   org: string;
   title: string;
   href?: string;
   className?: string;
   size?: "md" | "lg";
+  theme?: "light" | "dark";
 }) {
+  const isLight = theme === "light";
+
   const content = (
-    <>
-      <AppleLaurelBranch side="left" />
-      <div className="apple-award-center">
-        <AwardEmblem />
-        <span className="apple-award-org">{org}</span>
-        <strong className="apple-award-title">{title}</strong>
+    <div className="flex items-center justify-center gap-1.5 sm:gap-2.5">
+      <AppleLaurelBranch
+        side="left"
+        className={`w-5 h-9 sm:w-6 sm:h-11 ${
+          isLight ? "text-[var(--theme)]" : "text-amber-400"
+        } transition-transform group-hover:-translate-x-0.5`}
+      />
+      <div className="flex flex-col items-center text-center px-1">
+        <AwardEmblem
+          className={`mb-0.5 ${
+            isLight ? "text-[var(--theme)]" : "text-amber-400"
+          }`}
+        />
+        <span
+          className={`font-mono text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold ${
+            isLight ? "text-slate-600" : "text-slate-300"
+          }`}
+        >
+          {org}
+        </span>
+        <strong
+          className={`font-display text-xs sm:text-sm tracking-wide ${
+            isLight ? "text-[var(--ink)]" : "text-white"
+          }`}
+        >
+          {title}
+        </strong>
       </div>
-      <AppleLaurelBranch side="right" />
-    </>
+      <AppleLaurelBranch
+        side="right"
+        className={`w-5 h-9 sm:w-6 sm:h-11 ${
+          isLight ? "text-[var(--theme)]" : "text-amber-400"
+        } transition-transform group-hover:translate-x-0.5`}
+      />
+    </div>
   );
 
-  const classes = `apple-award-badge ${size === "lg" ? "apple-award-badge-lg" : ""} ${className}`.trim();
+  const containerClasses = `group inline-flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border transition-all duration-300 ${
+    isLight
+      ? "bg-white/95 border-slate-200/90 hover:border-[var(--theme)] hover:shadow-md hover:bg-white"
+      : "bg-slate-900/80 border-slate-700/80 hover:border-amber-400/50 hover:bg-slate-900"
+  } ${className}`.trim();
 
   if (href) {
     return (
-      <a href={href} className={classes} aria-label={`${org} ${title}`}>
+      <a href={href} className={containerClasses} aria-label={`${org} ${title}`}>
         {content}
       </a>
     );
   }
 
   return (
-    <div className={classes} role="img" aria-label={`${org} ${title}`}>
+    <div className={containerClasses} role="img" aria-label={`${org} ${title}`}>
       {content}
     </div>
   );
@@ -182,32 +219,33 @@ export function AppleAwardBadge({
 export function Laurel({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`apple-laurel-wreath-standalone ${className}`.trim()}
+      className={`inline-flex items-center gap-1 ${className}`.trim()}
       aria-hidden="true"
     >
-      <AppleLaurelBranch side="left" />
-      <AppleLaurelBranch side="right" />
+      <AppleLaurelBranch side="left" className="w-5 h-9 text-[var(--theme)]" />
+      <AppleLaurelBranch side="right" className="w-5 h-9 text-[var(--theme)]" />
     </div>
   );
 }
 
-export function Awards() {
+export function Awards({ theme = "light" }: { theme?: "light" | "dark" }) {
   return (
     <div
-      className="hero-awards hero-awards-apple"
+      className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl"
       role="region"
-      aria-label="Awards and Recognition"
+      aria-label="National Honors & Recognition"
     >
       <AppleAwardBadge
-        org="Shramabhimanee"
-        title="National Award · 2013"
+        org="National Honors"
+        title="Shramabhimanee Award · 2013"
         href="#achievements"
+        theme={theme}
       />
-      <span className="award-divider" aria-hidden="true" />
       <AppleAwardBadge
         org="Construction Exhibition"
-        title="Co-Sponsor · 2016"
+        title="Co-Sponsor Award · 2016"
         href="#achievements"
+        theme={theme}
       />
     </div>
   );

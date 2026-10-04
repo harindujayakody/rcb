@@ -1,104 +1,87 @@
-# RCB Holdings — Scroll-Animation Website Redesign
-### Design Specification · Next.js + shadcn/ui · v1.0 (2026-10-04)
+# RCB Holdings — Brand-New Website Redesign
+### Design Specification · Light Theme Royal Precision · v2.0 (2026-10-04)
 
-> **Purpose.** This document is the single source of truth for rebuilding
-> [rcb-opal.vercel.app](https://rcb-opal.vercel.app/) — the RCB Holdings
-> (interlock paving & construction machinery, Sri Lanka) marketing site — as a
-> modern, scroll-driven, client-impressing experience.
-> A developer should be able to build the entire site from this file alone.
+> **Purpose.** Single source of truth for the brand-new, light-themed, scroll-animated
+> marketing website for **RCB Holdings (Pvt) Ltd** — Sri Lanka's leading interlock paving
+> manufacturer and authorized distributor for SDLG, Noah, Shengya, and TNY heavy machinery.
 
 ---
 
-## 1. Design Direction
+## 1. Design Direction: "Royal Precision / Architectural Daylight"
 
-**Concept: "Industrial Cinematic."** Heavy machinery deserves weight.
-The redesign trades the current light editorial look for a dark, premium,
-engineering-grade aesthetic — the visual language of CAT, Liebherr and
-Komatsu brand films: near-black surfaces, concrete textures, safety-amber
-accents, and massive condensed typography that feels stamped, not typed.
+The redesign delivers a luminous, high-contrast, institutional-grade aesthetic inspired by modern architectural monographs and top-tier industrial design brands. Deep RCB Royal Blue (`#003580`) grounds the brand with authority, while crisp white (`#FFFFFF`) and architectural porcelain (`#F8FAFC`) surfaces create daylight clarity.
 
-**Why this impresses clients:**
-- Dark + amber = instant "heavy industry" recognition; it photographs machinery beautifully.
-- Oversized type + cinematic scroll motion = the Awwwards-style feel clients associate with expensive agencies.
-- Every scroll does *something* — parallax, reveals, pins, counters — so the site feels alive without gimmicks.
-
-**Design principles**
-1. **Scroll is the remote control.** No section is static; each has one signature scroll behavior (parallax, pin, scrub, stagger, count-up).
-2. **Motion with meaning.** Animations explain the product (a pinned horizontal gallery *is* the paving catalog; a scrubbed clip-path *is* the before/after transformation).
-3. **Restraint elsewhere.** One accent color, one display face, generous whitespace. Motion carries the drama, not decoration.
+### Core Principles
+1. **Light, Luminous & Architectural:** Deep royal blue `#003580` anchored against pure white `#FFFFFF` and subtle slate `#F8FAFC` surfaces. Crisp lines, sharp borders, and tactile shadows.
+2. **Strictly Zero Pills:** No `rounded-full` pills anywhere. All buttons, badges, cards, and navigation use architectural geometry (`rounded-md`, `rounded-lg`, `rounded-xl`, `rounded-2xl`).
+3. **Scroll-Craft Choreography (`scroll-craft`):** Pinned dimensional hero, independent visual planes, smooth spring-lerped playheads, and purposeful section-to-section transitions.
+4. **Institutional Trust & Confirmed Honors:** Prominently showcase the National Shramabhimanee Award (2013), Construction Exhibition Co-Sponsor Award (2016), and ICTAD registration.
 
 ---
 
-## 2. Tech Stack
+## 2. Design Tokens
 
-| Layer | Choice | Notes |
+### 2.1 Color Palette
+
+| Token | Hex / Value | Description & Role |
 |---|---|---|
-| Framework | **Next.js 15 (App Router)** | Keep existing project; `app/` routes |
-| UI kit | **shadcn/ui** | New-York style; copy components into `components/ui` |
-| Motion (React) | **`motion` package** (`motion/react`) | `useScroll`, `useTransform`, `useSpring`, `useInView`, `whileInView`, `AnimatePresence`, `layoutId` |
-| Pinned / scrub scenes | **GSAP + ScrollTrigger** | Horizontal-scroll paving gallery, pinned manifesto |
-| Smooth scroll | **Lenis** (`lenis`, `lenis/react`) | Buttery wheel physics; synced to ScrollTrigger's ticker |
-| Styling | Tailwind CSS v4 (`@theme` tokens) | Design tokens as CSS variables |
-| Fonts | `next/font`: **Anton** (display), **Inter** (body), **JetBrains Mono** (spec labels) | Self-hosted, no layout shift |
-| Images | `next/image` | AVIF/WebP, `priority` on hero only |
+| `--color-canvas` | `#FFFFFF` | Primary ground; pure architectural white |
+| `--color-canvas-subtle` | `#F8FAFC` | Secondary ground; soft porcelain slate |
+| `--color-canvas-muted` | `#F1F5F9` | Card surfaces, table headers, workshop panels |
+| `--color-theme` | `#003580` | **Primary Brand Color**; deep RCB royal blue |
+| `--color-theme-hover` | `#002760` | Dark royal blue for interactive hover states |
+| `--color-theme-accent` | `#0052CC` | Vivid electric sapphire for highlights & focus rings |
+| `--color-ink` | `#0A1128` | Monumental headline type; deep midnight navy |
+| `--color-slate-body` | `#334155` | Body paragraph text; high-contrast Slate-700 |
+| `--color-slate-muted` | `#64748B` | Technical specifications, captions, timestamps |
+| `--border-subtle` | `rgba(0, 53, 128, 0.08)` | Crisp card and divider hairlines |
+| `--border-strong` | `rgba(0, 53, 128, 0.18)` | Interactive input borders, hover highlights |
+| `--shadow-card` | `0 10px 30px -5px rgba(0, 53, 128, 0.06)` | Architectural elevation shadow |
+| `--shadow-float` | `0 20px 45px -10px rgba(0, 53, 128, 0.12)` | Floating modal, lightbox, and showcase shadows |
+
+### 2.2 Typography
+
+| Role | Font Family | Style / Weight | Usage |
+|---|---|---|---|
+| Display | **Anton** | Uppercase, `tracking-tight`, `leading-[0.92]` | Hero headlines `clamp(3.5rem, 10vw, 8.5rem)` |
+| Headlines | **Anton** | Uppercase, `tracking-tight`, `leading-[0.95]` | Section titles `clamp(2.5rem, 5vw, 4.5rem)` |
+| Body | **Inter** | `1rem – 1.125rem`, `leading-relaxed`, max `65ch` | Explanatory copy, articles, card details |
+| Eyebrow / Data | **JetBrains Mono** | `11px – 13px`, Uppercase, `tracking-[0.2em]` | Technical specs, indices: `01 // ARCHITECTURAL PAVING` |
+
+### 2.3 Geometry & Shapes (Anti-Pill Rule)
+
+- **Buttons:** `rounded-lg` or `rounded-xl` with crisp borders and subtle bevels.
+- **Badges:** `rounded-md` with `font-mono text-xs uppercase tracking-wider` and square indicator glyphs (`w-2 h-2 rounded-none bg-[#003580]`).
+- **Cards:** `rounded-xl` or `rounded-2xl` with `border border-slate-200/90`.
+- **Navigation:** Crisp top bar with glassmorphism backdrop (`rounded-none` or `rounded-xl` floating panel).
 
 ---
 
-## 3. Design Tokens
+## 3. Motion Architecture & Scroll-Craft Blueprint
 
-### 3.1 Color
+Using the principles from `scroll-craft/SKILL.md`:
 
-| Token | Value | Usage |
-|---|---|---|
-| `--ink` | `#0B0C0D` | Page background (dark sections) |
-| `--graphite` | `#141619` | Cards, panels on dark |
-| `--concrete` | `#EDEAE3` | Light section background |
-| `--paper` | `#F7F5F0` | Light cards |
-| `--steel` | `#9AA0A8` | Muted text on dark |
-| `--slate` | `#4A4E55` | Muted text on light |
-| `--safety` | `#FFB200` | **The** accent — CTAs, eyebrows, active states, progress |
-| `--safety-ink` | `#1A1206` | Text on safety-amber fills |
-| `--line-dark` | `rgba(255,255,255,.08)` | Hairlines on dark |
-| `--line-light` | `rgba(11,12,13,.10)` | Hairlines on light |
-
-### 3.2 Typography
-
-| Role | Font | Style |
-|---|---|---|
-| Display | **Anton** | UPPERCASE, `tracking-tight`, `leading-[.9]`. Hero `clamp(3.5rem, 12vw, 11rem)` |
-| Headline | Anton | Section titles `clamp(2.5rem, 6vw, 5rem)` |
-| Body | **Inter** | `1rem–1.125rem`, `leading-relaxed`, max `65ch` |
-| Eyebrow / spec | **JetBrains Mono** | `11–12px`, uppercase, `tracking-[.2em]`, amber or steel |
+```
+01. Navbar         Fixed · Glassmorphic backdrop · Royal Blue `#003580` brand mark · Quote CTA
+02. Hero           Layered Dimensional Stage · Anton Display Headline · Floating Metric Card
+03. Marquee        High-contrast royal blue ticker (`PAVING · SDLG · NOAH · HOKANDARA`)
+04. Manifesto      Pinned word scrub reveal on porcelain background
+05. Paving Track   GSAP Pinned horizontal gallery · 5 Architectural Patterns · Spec rows
+06. Machinery      4 Core Division monolithic cards with 3D glossy anchors & specs
+07. Transformation Interactive Before/After Compare Slider with chrome control bar
+08. Calculator     Architectural material estimator · Metric/Imperial · Live CountUp
+09. Archive        Masonry field photography archive · Fullscreen Lightbox Dialog
+10. Story          Corporate heritage & ICTAD construction timeline
+11. Recognition    National Shramabhimanee Award & Construction Co-Sponsor with laurels
+12. OEM Partners   Continuous brand logo marquee (SDLG, Noah, Shengya, TNY)
+13. Consultation   Direct contact form & Hokandara showroom facility coordinates
+14. Footer         Monumental architectural footer with directory indices & credits
+```
 
 ---
 
-## 4. Reusable Motion Primitives
+## 4. Accessibility & Fallbacks
 
-Built in `components/motion/`:
-- `Reveal` (`reveal.tsx`)
-- `SplitLines` (`split-lines.tsx`)
-- `Parallax` (`parallax.tsx`)
-- `ScrubText` (`scrub-text.tsx`)
-- `Marquee` (`marquee.tsx`)
-- `CountUp` (`count-up.tsx`)
-- `Magnetic` (`magnetic.tsx`)
-- `HorizontalScroll` (`horizontal-scroll.tsx`)
-- `CompareSlider` (`compare-slider.tsx`)
-
----
-
-## 5. Page Blueprint & Sections
-
-0. Preloader: 0→100 counter + curtain lift
-1. Navbar: fixed, blur on scroll, hide on scroll down, active indicators, amber CTA
-2. Hero: cinematic, parallax, split headline, meta row
-3. Marquee strip: amber band, ink Anton text scrolling (-2deg)
-4. Manifesto: pinned word-reveal scrub
-5. Paving: pinned horizontal scroll gallery (shadcn Cards)
-6. Machinery: sticky media + scrolling spec sheets (shadcn Tabs, Table, Badge)
-7. Transformation: before/after custom CompareSlider
-8. Calculator: light concrete section, interactive sliders + animated CountUp
-9. Gallery: masonry + lightbox Dialog with filter chips
-10. Story + Vision: timeline with scroll progress line + ScrubText quote
-11. Recognition: award cards + stat count-ups
-12. Contact + Footer: giant Anton CTA, contact form, outlined RCB marquee footer
+- `prefers-reduced-motion`: Zero pinning, smooth instant layout, full readable content.
+- Color contrast: All body text passes WCAG AAA (`#334155` on `#FFFFFF` = 7.5:1; `#0A1128` on `#FFFFFF` = 15.6:1).
+- Mobile: Touch-first horizontal scroll, responsive layouts, 60fps hardware-accelerated transforms.

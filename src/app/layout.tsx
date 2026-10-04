@@ -46,8 +46,8 @@ export default function RootLayout({
       className={`${anton.variable} ${inter.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
-      <body className="bg-[var(--ink)] text-[var(--paper)] font-sans antialiased selection:bg-[var(--safety)] selection:text-[var(--safety-ink)]" suppressHydrationWarning>
-        <a href="#main" className="skip-link sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-[var(--safety)] focus:text-[var(--safety-ink)] focus:px-4 focus:py-2 focus:font-mono focus:text-xs">
+      <body className="bg-[var(--canvas)] text-[var(--slate-body)] font-sans antialiased selection:bg-[var(--theme)] selection:text-white" suppressHydrationWarning>
+        <a href="#main" className="skip-link sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-[var(--theme)] focus:text-white focus:px-4 focus:py-2 focus:font-mono focus:text-xs rounded-md">
           Skip to content
         </a>
         <Providers>

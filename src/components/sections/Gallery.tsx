@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { Reveal } from "@/components/motion/reveal";
 import {
   Dialog,
@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 
 interface GalleryPhoto {
   id: string;
@@ -120,29 +120,29 @@ export function Gallery() {
   return (
     <section
       id="gallery"
-      className="relative py-28 md:py-36 bg-[var(--ink)] text-[var(--paper)] border-t border-[var(--line-dark)]"
+      className="relative py-28 md:py-36 bg-[var(--canvas)] text-[var(--ink)] border-t border-slate-200/80"
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-14">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-[var(--line-dark)] mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-slate-200 mb-12">
           <div>
             <Reveal y={15}>
               <div className="flex items-center gap-3 mb-3">
-                <span className="w-5 h-[2px] bg-[var(--safety)] inline-block" />
-                <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--safety)]">
+                <span className="w-5 h-[2.5px] bg-[var(--theme)] inline-block" />
+                <span className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--theme)] font-bold">
                   05 — FIELD ARCHIVE
                 </span>
               </div>
             </Reveal>
 
             <Reveal delay={0.1} y={20}>
-              <h2 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-tight leading-[0.95] text-[var(--paper)]">
+              <h2 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-tight leading-[0.95] text-[var(--ink)]">
                 OUR WORLD. THROUGH THE LENS.
               </h2>
             </Reveal>
           </div>
 
-          {/* Filter Chips */}
+          {/* Filter Chips (Zero pills: rounded-lg) */}
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
@@ -151,8 +151,8 @@ export function Gallery() {
                 onClick={() => setActiveFilter(cat)}
                 className={`font-mono text-xs uppercase px-4 py-2 rounded-lg transition-all ${
                   activeFilter === cat
-                    ? "bg-[var(--safety)] text-[var(--safety-ink)] font-bold shadow-md"
-                    : "bg-[var(--graphite)] text-[var(--steel)] border border-[var(--line-dark)] hover:text-white"
+                    ? "bg-[var(--theme)] text-white font-bold shadow-xs"
+                    : "bg-slate-100 text-slate-600 border border-slate-200 hover:text-slate-900 hover:bg-slate-200/70"
                 }`}
               >
                 {cat}
@@ -172,7 +172,7 @@ export function Gallery() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.05 }}
               onClick={() => setSelectedPhotoIndex(index)}
-              className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[var(--graphite)] border border-[var(--line-dark)] cursor-pointer group shadow-xl"
+              className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 cursor-pointer group shadow-sm hover:shadow-xl transition-all"
             >
               <Image
                 src={photo.src}
@@ -181,24 +181,24 @@ export function Gallery() {
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[var(--ink)]/90 via-[var(--ink)]/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
 
               {/* Hover Overlay Info */}
               <div className="absolute inset-0 p-6 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="flex justify-end">
-                  <span className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-[var(--safety)]">
+                  <span className="w-8 h-8 rounded-lg bg-black/60 backdrop-blur-md flex items-center justify-center text-white">
                     <ZoomIn className="w-4 h-4" />
                   </span>
                 </div>
 
                 <div>
-                  <Badge className="bg-[var(--safety)] text-[var(--safety-ink)] text-[10px] font-mono font-bold tracking-wider mb-2 border-none">
+                  <Badge className="bg-[var(--theme)] text-white text-[10px] font-mono font-bold tracking-wider mb-2 border-none rounded-md">
                     {photo.category}
                   </Badge>
-                  <h3 className="font-display text-xl text-[var(--paper)]">
+                  <h3 className="font-display text-xl text-white">
                     {photo.title}
                   </h3>
-                  <p className="text-xs text-[var(--steel)] line-clamp-1 font-body mt-1">
+                  <p className="text-xs text-slate-200 line-clamp-1 font-body mt-1">
                     {photo.description}
                   </p>
                 </div>
@@ -213,10 +213,10 @@ export function Gallery() {
         open={selectedPhotoIndex !== null}
         onOpenChange={(open) => !open && setSelectedPhotoIndex(null)}
       >
-        <DialogContent className="max-w-4xl p-0 bg-[var(--ink)] border-[var(--line-dark)] text-[var(--paper)] overflow-hidden rounded-2xl shadow-2xl">
+        <DialogContent className="max-w-4xl p-0 bg-white border-slate-200 text-slate-900 overflow-hidden rounded-2xl shadow-2xl">
           {selectedPhoto && (
             <div className="flex flex-col">
-              <div className="relative w-full aspect-[16/10] bg-black">
+              <div className="relative w-full aspect-[16/10] bg-slate-950">
                 <Image
                   src={selectedPhoto.src}
                   alt={selectedPhoto.title}
@@ -225,11 +225,11 @@ export function Gallery() {
                   className="object-contain"
                 />
 
-                {/* Navigation Arrows */}
+                {/* Navigation Arrows (Zero pills: rounded-lg) */}
                 <button
                   type="button"
                   onClick={handlePrev}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-[var(--safety)] hover:text-[var(--safety-ink)] text-white flex items-center justify-center transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-lg bg-white/90 hover:bg-[var(--theme)] hover:text-white text-slate-900 flex items-center justify-center transition-colors shadow-md"
                   aria-label="Previous photo"
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -238,7 +238,7 @@ export function Gallery() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-[var(--safety)] hover:text-[var(--safety-ink)] text-white flex items-center justify-center transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-lg bg-white/90 hover:bg-[var(--theme)] hover:text-white text-slate-900 flex items-center justify-center transition-colors shadow-md"
                   aria-label="Next photo"
                 >
                   <ChevronRight className="w-5 h-5" />
@@ -246,17 +246,17 @@ export function Gallery() {
               </div>
 
               {/* Lightbox Caption */}
-              <div className="p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-[var(--line-dark)]">
+              <div className="p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-200">
                 <div>
-                  <DialogTitle className="font-display text-2xl text-[var(--paper)]">
+                  <DialogTitle className="font-display text-2xl text-[var(--ink)]">
                     {selectedPhoto.title}
                   </DialogTitle>
-                  <DialogDescription className="text-sm text-[var(--steel)] font-body mt-1">
+                  <DialogDescription className="text-sm text-slate-600 font-body mt-1">
                     {selectedPhoto.description}
                   </DialogDescription>
                 </div>
 
-                <div className="font-mono text-xs text-[var(--safety)] tracking-wider">
+                <div className="font-mono text-xs text-[var(--theme)] font-bold tracking-wider">
                   {selectedPhoto.category.toUpperCase()} ARCHIVE
                 </div>
               </div>

@@ -87,7 +87,7 @@ export function CompareSlider({
         }}
         onMouseMove={handleMouseMove}
         onTouchMove={handleTouchMove}
-        className="relative w-full aspect-[16/10] max-h-[640px] overflow-hidden rounded-xl cursor-ew-resize select-none bg-[var(--graphite)] border border-[var(--line-dark)] shadow-2xl"
+        className="relative w-full aspect-[16/10] max-h-[640px] overflow-hidden rounded-2xl cursor-ew-resize select-none bg-slate-100 border border-slate-200/90 shadow-xl"
       >
         {/* Before Image (Background) */}
         <div className="absolute inset-0">
@@ -98,8 +98,8 @@ export function CompareSlider({
             sizes="(max-width: 1200px) 100vw, 1200px"
             className="object-cover"
           />
-          <div className="absolute top-4 left-4 z-10 px-3 py-1 rounded-full bg-[var(--ink)]/85 backdrop-blur-md border border-[var(--line-dark)] font-mono text-[11px] text-[var(--steel)] tracking-wider">
-            BEFORE
+          <div className="absolute top-4 left-4 z-10 px-3.5 py-1.5 rounded-md bg-white/95 backdrop-blur-md border border-slate-200 font-mono text-[11px] font-bold text-slate-700 tracking-wider shadow-sm">
+            BEFORE PAVING
           </div>
         </div>
 
@@ -115,8 +115,8 @@ export function CompareSlider({
             sizes="(max-width: 1200px) 100vw, 1200px"
             className="object-cover"
           />
-          <div className="absolute top-4 right-4 z-10 px-3 py-1 rounded-full bg-[var(--safety)] text-[var(--safety-ink)] font-mono text-[11px] font-bold tracking-wider shadow-lg">
-            AFTER
+          <div className="absolute top-4 right-4 z-10 px-3.5 py-1.5 rounded-md bg-[var(--theme)] text-white font-mono text-[11px] font-bold tracking-wider shadow-md">
+            AFTER · RCB INTERLOCK
           </div>
         </div>
 
@@ -125,13 +125,13 @@ export function CompareSlider({
           className="absolute top-0 bottom-0 z-20 pointer-events-none"
           style={{ left: `${sliderPosition}%` }}
         >
-          {/* Vertical line */}
-          <div className="absolute inset-y-0 -left-[1px] w-[2px] bg-[var(--safety)] shadow-[0_0_12px_rgba(255,178,0,0.8)]" />
+          {/* Vertical line in Royal Blue */}
+          <div className="absolute inset-y-0 -left-[1px] w-[2.5px] bg-[var(--theme)] shadow-[0_0_8px_rgba(0,53,128,0.5)]" />
 
-          {/* Grip Button */}
-          <div className="absolute top-1/2 -left-5 -translate-y-1/2 w-10 h-10 rounded-full bg-[var(--ink)] border-2 border-[var(--safety)] flex items-center justify-center shadow-2xl pointer-events-auto cursor-ew-resize transition-transform hover:scale-110 active:scale-95">
+          {/* Grip Button (Zero pills: rounded-lg architectural handle) */}
+          <div className="absolute top-1/2 -left-5 -translate-y-1/2 w-10 h-10 rounded-lg bg-white border-2 border-[var(--theme)] flex items-center justify-center shadow-xl pointer-events-auto cursor-ew-resize transition-transform hover:scale-110 active:scale-95">
             <svg
-              className="w-4 h-4 text-[var(--safety)]"
+              className="w-4 h-4 text-[var(--theme)]"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -146,9 +146,9 @@ export function CompareSlider({
 
       {caption && (
         <div className="mt-4 flex flex-col md:flex-row items-center justify-between w-full px-2 gap-2 text-center md:text-left">
-          <p className="text-sm font-medium text-[var(--paper)]">{caption}</p>
-          <span className="font-mono text-[11px] text-[var(--steel)]">
-            * Illustrative demonstration of paving transformation
+          <p className="text-sm font-semibold text-[var(--ink)]">{caption}</p>
+          <span className="font-mono text-[11px] text-slate-500 font-medium">
+            * Drag slider to witness the high-density paving transformation
           </span>
         </div>
       )}
