@@ -10,6 +10,8 @@ import {
   ArrowDown,
   Play,
   Pause,
+  Layers,
+  MapPin,
 } from "lucide-react";
 import { Magnetic } from "@/components/motion/magnetic";
 import { Awards } from "@/components/brand";
@@ -64,14 +66,13 @@ const blocks = Array.from({ length: rows * columns }, (_, index) => {
 });
 
 const stages = [
-  { id: 0, label: "01 Subgrade", target: 0.05, desc: "Graded foundation" },
+  { id: 0, label: "01 Subgrade", target: 0.05, desc: "Graded base" },
   { id: 1, label: "02 Placement", target: 0.52, desc: "Interlock assembly" },
   { id: 2, label: "03 Finished", target: 1.0, desc: "Locked 50 MPa" },
 ];
 
 export function Hero() {
-  const showcaseTrackRef = useRef<HTMLDivElement>(null);
-  const cardPinRef = useRef<HTMLDivElement>(null);
+  const heroSectionRef = useRef<HTMLElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -85,19 +86,19 @@ export function Hero() {
   const [activeStage, setActiveStage] = useState(0);
   const [hoveredBlockInfo, setHoveredBlockInfo] = useState<string | null>(null);
 
-  // Target progress ref updated via Motion's useScroll
+  // Target progress refs driven by Motion's useScroll
   const targetProgressRef = useRef(0);
   const currentProgressRef = useRef(0);
 
-  // Motion-driven scroll tracking (Zero window.addEventListener scroll leaks)
+  // Motion-driven scroll tracking on the hero section pinned track
   const { scrollYProgress } = useScroll({
-    target: showcaseTrackRef,
-    offset: ["start 84px", "end end"],
+    target: heroSectionRef,
+    offset: ["start start", "end end"],
   });
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     if (prefersReduced || paused) return;
-    targetProgressRef.current = clamp(0.04 + latest * 1.2);
+    targetProgressRef.current = clamp(0.04 + latest * 1.25);
   });
 
   // Canvas brick assembly render loop
@@ -138,7 +139,7 @@ export function Hero() {
 
       const p = currentProgressRef.current;
 
-      // Update lightweight DOM indicators directly without triggering full React tree re-renders
+      // Direct DOM update for performance (Zero React state re-render overhead)
       if (statusBadgeRef.current) {
         statusBadgeRef.current.textContent =
           p >= 0.95
@@ -305,7 +306,7 @@ export function Hero() {
         );
         if (found) {
           setHoveredBlockInfo(
-            `80mm Heavy-Duty Interlock · Block #${found.id + 1} · Compressive: 50 MPa`
+            `80mm Heavy-Duty Interlock · Block #${found.id + 1} · 50 MPa`
           );
         } else {
           setHoveredBlockInfo(null);
@@ -380,17 +381,11 @@ export function Hero() {
   const selectStage = (index: number) => {
     setActiveStage(index);
     const targetProgressVal = stages[index].target;
-    const track = showcaseTrackRef.current;
-    const pin = cardPinRef.current;
-    if (!track || !pin) return;
+    const hero = heroSectionRef.current;
+    if (!hero) return;
 
-    const distance = Math.max(1, track.offsetHeight - pin.offsetHeight);
-    const headerOffset = 84;
-    const scrollTarget =
-      track.getBoundingClientRect().top +
-      window.scrollY -
-      headerOffset +
-      targetProgressVal * distance;
+    const distance = Math.max(1, hero.offsetHeight - window.innerHeight);
+    const scrollTarget = hero.offsetTop + targetProgressVal * distance;
 
     window.scrollTo({
       top: scrollTarget,
@@ -400,213 +395,232 @@ export function Hero() {
 
   return (
     <section
+      ref={heroSectionRef}
       id="hero"
-      className="relative bg-[var(--canvas)] text-[var(--ink)] select-none pt-20 lg:pt-24 pb-16 lg:pb-24 border-b border-[var(--border)]"
+      className="relative bg-[var(--canvas)] text-[var(--ink)] select-none border-b border-[var(--border)] pt-20 sm:pt-24 lg:pt-20 min-h-auto lg:min-h-[220vh]"
       aria-label="RCB Holdings Engineering Hero"
     >
-      {/* 1. Daylight Architectural Header (Strictly under max pt-24 cap, fits initial viewport) */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-end">
+      {/* Viewport Container: sticky split-screen on desktop, natural flow on mobile */}
+      <div className="lg:sticky lg:top-[80px] lg:h-[calc(100dvh-96px)] lg:min-h-[620px] w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4 lg:py-3 flex flex-col justify-between">
+        
+        {/* Main Asymmetric Split Grid: Col-span-5 Left Editorial / Col-span-7 Right Monumental Canvas */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 h-full items-stretch min-h-0">
           
-          {/* Left Column: Eyebrow + Monumental Headline + Crisp Subline (≤20 words) */}
-          <div className="lg:col-span-7">
-            {/* Technical Credential Badge (Strictly zero pills: rounded-md) */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#EBF3FF] border border-[#003580]/20 text-[#003580] mb-3 sm:mb-4 shadow-xs">
-              <span className="w-2 h-2 rounded-xs bg-[#003580] animate-pulse" />
-              <span className="font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                HEAVY INDUSTRY · SRI LANKA · ICTAD REGISTERED
-              </span>
-            </div>
-
-            {/* Monumental Headline (Max 2 lines) */}
-            <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] tracking-tight leading-[0.94] text-[#0A1128] mb-3 sm:mb-4">
-              BUILD SOMETHING <br />
-              <span className="text-[#003580]">THAT LASTS.</span>
-            </h1>
-
-            {/* High-Impact Subtext (Strictly 17 words, max 20 words constraint) */}
-            <p className="text-sm sm:text-base md:text-lg text-slate-700 max-w-2xl font-sans leading-relaxed">
-              Precision interlock paving engineered to high compressive standards. Island-wide heavy machinery distribution for SDLG, Noah &amp; Shengya.
-            </p>
-          </div>
-
-          {/* Right Column: High-Impact Action CTAs + Symmetrical Awards Bar */}
-          <div className="lg:col-span-5 flex flex-col items-start lg:items-end gap-3.5">
-            {/* CTAs (Strictly zero pills: rounded-lg, labels ≤ 3 words) */}
-            <div className="flex flex-wrap items-center gap-3 w-full lg:justify-end">
-              <Magnetic strength={0.2}>
-                <a
-                  href="#calculator"
-                  className="px-5 sm:px-6 py-3 rounded-lg bg-[#003580] hover:bg-[#002760] text-white font-mono text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2"
-                >
-                  <Calculator className="w-4 h-4" />
-                  <span>CALCULATE YOUR BRICKS</span>
-                </a>
-              </Magnetic>
-
-              <Magnetic strength={0.2}>
-                <a
-                  href="#machinery"
-                  className="px-5 sm:px-6 py-3 rounded-lg bg-white hover:bg-slate-50 text-[#0A1128] border border-slate-300 hover:border-[#003580] font-mono text-xs font-semibold uppercase tracking-wider transition-all duration-300 flex items-center gap-2 shadow-xs"
-                >
-                  <Wrench className="w-4 h-4 text-[#003580]" />
-                  <span>EXPLORE MACHINERY</span>
-                </a>
-              </Magnetic>
-            </div>
-
-            {/* Symmetrical Hero Awards Bar (Light theme with laurel emblems) */}
-            <div className="w-full lg:max-w-md pt-0.5">
-              <Awards theme="light" />
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* 2. Pinned Monumental Showcase Card Track (Motion-Scrubbed "ගල් අල්ලාගෙන එනවා") */}
-      <div
-        ref={showcaseTrackRef}
-        className="relative max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8"
-        style={{ minHeight: "170vh" }}
-      >
-        {/* Sticky Showcase Card (Architectural radius, strictly zero pills: rounded-2xl lg:rounded-3xl) */}
-        <div
-          ref={cardPinRef}
-          className="sticky top-[84px] w-full rounded-2xl lg:rounded-3xl border border-slate-200/90 bg-slate-900 shadow-[0_25px_60px_-15px_rgba(0,53,128,0.12)] overflow-hidden h-[520px] sm:h-[600px] lg:h-[660px] flex flex-col justify-between"
-        >
-          {/* Canvas Scene Frame */}
-          <div
-            ref={sceneRef}
-            className="absolute inset-0 w-full h-full cursor-crosshair overflow-hidden"
-            aria-label="Interactive Sri Lankan estate paving assembly visualization"
-          >
-            {/* Semantic fallback image */}
-            <Image
-              src="/paving-after.webp"
-              alt="Architectural interlocking paving courtyard at luxury Sri Lankan estate"
-              fill
-              priority
-              unoptimized
-              sizes="(max-width: 1280px) 100vw, 1280px"
-              className="object-cover object-center pointer-events-none"
-            />
-
-            {/* Interactive Brick Laying Canvas */}
-            <canvas
-              ref={canvasRef}
-              className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
-                ready ? "opacity-100" : "opacity-0"
-              }`}
-              aria-hidden="true"
-            />
-          </div>
-
-          {/* Top Overlays: Metric Badge & Engineering Credential */}
-          <div className="relative z-10 w-full p-3 sm:p-6 flex items-start justify-between pointer-events-none gap-3">
-            {/* Top-Left Metric Badge (Frosted Light Glass, strictly zero pills: rounded-xl) */}
-            <div className="p-2.5 sm:p-4 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md max-w-[170px] sm:max-w-[240px]">
-              <div className="font-display text-xl sm:text-3xl text-[#003580] leading-none mb-0.5 sm:mb-1">
-                467+
+          {/* Left Column (col-span-5): Command Center Editorial Architecture */}
+          <div className="lg:col-span-5 flex flex-col justify-between h-full py-1 sm:py-2 min-h-0">
+            
+            {/* Top Telemetry & Status Unit */}
+            <div>
+              {/* Technical Credential Badge (Strictly zero pills: rounded-md) */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#EBF3FF] border border-[#003580]/20 text-[#003580] mb-3 sm:mb-4 shadow-xs">
+                <span className="w-2 h-2 rounded-xs bg-[#003580] animate-pulse" />
+                <span className="font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                  HEAVY INDUSTRY · SRI LANKA · ICTAD C3
+                </span>
               </div>
-              <div className="font-mono text-[9px] sm:text-xs font-bold text-[#0A1128] uppercase tracking-wide">
-                Island-Wide Projects
-              </div>
-              <p className="hidden sm:block text-[10px] sm:text-[11px] text-slate-500 font-sans mt-0.5 leading-snug">
-                Paved estate driveways, container yards &amp; commercial zones.
+
+              {/* Monumental Headline (Max 2 lines, Anton display) */}
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-[4.2rem] xl:text-[4.8rem] tracking-tight leading-[0.92] text-[#0A1128] mb-3 sm:mb-4">
+                BUILD SOMETHING <br />
+                <span className="text-[#003580]">THAT LASTS.</span>
+              </h1>
+
+              {/* Value Proposition Subtext (Strictly 17 words, max 20 words constraint) */}
+              <p className="text-sm sm:text-base text-slate-700 max-w-xl font-sans leading-relaxed mb-5 sm:mb-6">
+                Precision interlock paving engineered to high compressive standards. Island-wide heavy machinery distribution for SDLG, Noah &amp; Shengya.
               </p>
+
+              {/* Action CTAs (Strictly zero pills: rounded-lg, labels ≤ 3 words) */}
+              <div className="flex flex-wrap items-center gap-3 mb-5">
+                <Magnetic strength={0.2}>
+                  <a
+                    href="#calculator"
+                    className="px-5 sm:px-6 py-3 rounded-lg bg-[#003580] hover:bg-[#002760] text-white font-mono text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2"
+                  >
+                    <Calculator className="w-4 h-4" />
+                    <span>CALCULATE YOUR BRICKS</span>
+                  </a>
+                </Magnetic>
+
+                <Magnetic strength={0.2}>
+                  <a
+                    href="#machinery"
+                    className="px-5 sm:px-6 py-3 rounded-lg bg-white hover:bg-slate-50 text-[#0A1128] border border-slate-300 hover:border-[#003580] font-mono text-xs font-semibold uppercase tracking-wider transition-all duration-300 flex items-center gap-2 shadow-xs"
+                  >
+                    <Wrench className="w-4 h-4 text-[#003580]" />
+                    <span>EXPLORE MACHINERY</span>
+                  </a>
+                </Magnetic>
+              </div>
             </div>
 
-            {/* Top-Right Engineering Tag (Frosted Light Glass, strictly zero pills: rounded-xl) */}
-            <div className="hidden sm:flex px-4 py-3 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#EBF3FF] border border-[#003580]/20 flex items-center justify-center text-[#003580]">
-                <ShieldCheck className="w-4 h-4" />
+            {/* Bottom Symmetrical Verified Awards Bar + Coordinates */}
+            <div className="pt-2 border-t border-slate-200/80">
+              <div className="mb-3">
+                <Awards theme="light" />
               </div>
-              <div className="text-left font-mono">
-                <div className="text-xs font-bold text-[#0A1128] uppercase">
-                  ICTAD C3 REGISTERED
-                </div>
-                <div className="text-[10px] text-slate-500 uppercase tracking-wider">
-                  CEDA Grade Certified Contractor
-                </div>
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 uppercase tracking-wider pt-1">
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="w-3 h-3 text-[#003580]" />
+                  <span>Hokandara Facility · 6.8659° N, 79.9607° E</span>
+                </span>
+                <span className="hidden sm:inline font-bold text-[#003580]">Est. 2011</span>
               </div>
             </div>
+
           </div>
 
-          {/* Hover Stone Blueprint Specification Micro-HUD */}
-          {hoveredBlockInfo && (
-            <div className="absolute top-20 sm:top-28 left-3 sm:left-6 z-20 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg bg-[#0A1128]/95 text-white font-mono text-[10px] sm:text-[11px] shadow-lg border border-white/20 backdrop-blur-md pointer-events-none flex items-center gap-2 animate-in fade-in zoom-in-95 duration-150">
-              <span className="w-1.5 h-1.5 rounded-xs bg-[#60A5FA]" />
-              <span>{hoveredBlockInfo}</span>
-            </div>
-          )}
-
-          {/* Bottom Overlays: Partner Dock & Kinetic Scrubber HUD */}
-          <div className="relative z-10 w-full p-3 sm:p-6 flex flex-wrap items-center justify-between gap-2.5 pointer-events-auto">
-            {/* Bottom OEM Machinery Partner Dock (Strictly zero pills: rounded-xl) */}
-            <div className="px-4 py-2.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md hidden md:flex items-center gap-3 font-mono">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                MACHINERY PARTNERS
-              </span>
-              <span className="w-1 h-1 rounded-xs bg-slate-300" />
-              <div className="flex items-center gap-3 text-xs font-bold text-[#003580]">
-                <span>SDLG</span>
-                <span>·</span>
-                <span>NOAH</span>
-                <span>·</span>
-                <span>SHENGYA</span>
-                <span>·</span>
-                <span>YINENG</span>
-              </div>
-            </div>
-
-            {/* Interactive Stage Timeline Navigation (Subgrade / Placement / Finish) */}
-            <div
-              className="flex items-center gap-1 sm:gap-2 font-mono text-xs bg-white/95 backdrop-blur-md p-1 sm:p-1.5 rounded-xl border border-slate-200/90 shadow-md"
-              role="tablist"
-              aria-label="Paving assembly sequence stages"
-            >
-              {stages.map((st) => (
-                <button
-                  key={st.id}
-                  type="button"
-                  onClick={() => selectStage(st.id)}
-                  className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border text-[10px] sm:text-xs transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
-                    activeStage === st.id
-                      ? "bg-[#003580] text-white border-[#003580] font-bold shadow-xs"
-                      : "bg-transparent text-slate-600 border-transparent hover:bg-slate-100 hover:text-[#0A1128]"
-                  }`}
-                  role="tab"
-                  aria-selected={activeStage === st.id}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-xs ${
-                      activeStage === st.id ? "bg-white" : "bg-slate-400"
-                    }`}
-                  />
-                  <span>{st.label}</span>
-                </button>
-              ))}
-
-              <button
-                type="button"
-                onClick={() => setPaused((v) => !v)}
-                className="p-1 sm:p-1.5 rounded-lg hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
-                aria-label={paused ? "Resume paving motion" : "Pause paving motion"}
-                title={paused ? "Resume paving motion" : "Pause paving motion"}
+          {/* Right Column (col-span-7): Towering Monumental Showcase Stage (Kinetic "ගල් අල්ලාගෙන එනවා") */}
+          <div className="lg:col-span-7 h-full relative min-h-[480px] sm:min-h-[540px] lg:min-h-0">
+            <div className="relative w-full h-full rounded-2xl lg:rounded-3xl border border-slate-200/90 bg-slate-900 shadow-[0_25px_60px_-15px_rgba(0,53,128,0.12)] overflow-hidden flex flex-col justify-between">
+              
+              {/* Canvas Scene Frame */}
+              <div
+                ref={sceneRef}
+                className="absolute inset-0 w-full h-full cursor-crosshair overflow-hidden"
+                aria-label="Interactive Sri Lankan estate paving assembly visualization"
               >
-                {paused ? <Play className="w-3.5 h-3.5 text-[#003580]" /> : <Pause className="w-3.5 h-3.5" />}
-              </button>
-            </div>
+                {/* Semantic fallback image */}
+                <Image
+                  src="/paving-after.webp"
+                  alt="Architectural interlocking paving courtyard at luxury Sri Lankan estate"
+                  fill
+                  priority
+                  unoptimized
+                  sizes="(max-width: 1024px) 100vw, 58vw"
+                  className="object-cover object-center pointer-events-none"
+                />
 
-            {/* Overlaid Bottom-Right Live Kinetic Status Indicator (Ref-driven to prevent React churn) */}
-            <div className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md flex items-center gap-2 font-mono text-[10px] sm:text-[11px] font-semibold text-[#0A1128]">
-              <span ref={statusDotRef} className="w-2 h-2 rounded-xs bg-[#003580] animate-pulse" />
-              <span ref={statusBadgeRef}>ASSEMBLING: 0%</span>
+                {/* Interactive Brick Laying Canvas */}
+                <canvas
+                  ref={canvasRef}
+                  className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
+                    ready ? "opacity-100" : "opacity-0"
+                  }`}
+                  aria-hidden="true"
+                />
+              </div>
+
+              {/* Top Overlays: Liquid Glass Metric Badge & ICTAD C3 Credential */}
+              <div className="relative z-10 w-full p-3 sm:p-5 flex items-start justify-between pointer-events-none gap-3">
+                {/* Top-Left Metric Badge (Liquid Glass Refraction, strictly zero pills: rounded-xl) */}
+                <div className="p-3 sm:p-3.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_8px_20px_rgba(0,0,0,0.06)] max-w-[170px] sm:max-w-[210px]">
+                  <div className="font-display text-2xl sm:text-3xl text-[#003580] leading-none mb-0.5">
+                    467+
+                  </div>
+                  <div className="font-mono text-[9px] sm:text-[10px] font-bold text-[#0A1128] uppercase tracking-wide">
+                    Island-Wide Projects
+                  </div>
+                  <p className="hidden sm:block text-[10px] text-slate-500 font-sans mt-0.5 leading-snug">
+                    Tested 50 MPa structural load.
+                  </p>
+                </div>
+
+                {/* Top-Right Engineering Tag (Liquid Glass Refraction, strictly zero pills: rounded-xl) */}
+                <div className="hidden sm:flex px-3.5 py-2.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_8px_20px_rgba(0,0,0,0.06)] items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-[#EBF3FF] border border-[#003580]/20 flex items-center justify-center text-[#003580]">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="text-left font-mono">
+                    <div className="text-[11px] font-bold text-[#0A1128] uppercase">
+                      ICTAD C3 REGISTERED
+                    </div>
+                    <div className="text-[9px] text-slate-500 uppercase tracking-wider">
+                      CEDA Grade Certified
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hover Stone Blueprint Specification Micro-HUD */}
+              {hoveredBlockInfo && (
+                <div className="absolute top-18 sm:top-20 left-3 sm:left-5 z-20 px-3 py-1.5 rounded-lg bg-[#0A1128]/95 text-white font-mono text-[10px] shadow-lg border border-white/20 backdrop-blur-md pointer-events-none flex items-center gap-2 animate-in fade-in zoom-in-95 duration-150">
+                  <span className="w-1.5 h-1.5 rounded-xs bg-[#60A5FA]" />
+                  <span>{hoveredBlockInfo}</span>
+                </div>
+              )}
+
+              {/* Bottom Overlays: Partner Dock & Kinetic Scrubber HUD */}
+              <div className="relative z-10 w-full p-3 sm:p-5 flex flex-wrap items-center justify-between gap-2.5 pointer-events-auto">
+                {/* Bottom OEM Machinery Partner Dock (Strictly zero pills: rounded-xl) */}
+                <div className="px-3.5 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md hidden xl:flex items-center gap-2.5 font-mono">
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                    PARTNERS
+                  </span>
+                  <span className="w-1 h-1 rounded-xs bg-slate-300" />
+                  <div className="flex items-center gap-2.5 text-[11px] font-bold text-[#003580]">
+                    <span>SDLG</span>
+                    <span>·</span>
+                    <span>NOAH</span>
+                    <span>·</span>
+                    <span>SHENGYA</span>
+                    <span>·</span>
+                    <span>YINENG</span>
+                  </div>
+                </div>
+
+                {/* Interactive Stage Timeline Navigation (Subgrade / Placement / Finish) */}
+                <div
+                  className="flex items-center gap-1 sm:gap-1.5 font-mono text-xs bg-white/95 backdrop-blur-md p-1 sm:p-1.5 rounded-xl border border-slate-200/90 shadow-md"
+                  role="tablist"
+                  aria-label="Paving assembly sequence stages"
+                >
+                  {stages.map((st) => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => selectStage(st.id)}
+                      className={`px-2.5 sm:px-3 py-1 rounded-lg border text-[10px] sm:text-[11px] transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
+                        activeStage === st.id
+                          ? "bg-[#003580] text-white border-[#003580] font-bold shadow-xs"
+                          : "bg-transparent text-slate-600 border-transparent hover:bg-slate-100 hover:text-[#0A1128]"
+                      }`}
+                      role="tab"
+                      aria-selected={activeStage === st.id}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-xs ${
+                          activeStage === st.id ? "bg-white" : "bg-slate-400"
+                        }`}
+                      />
+                      <span>{st.label}</span>
+                    </button>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() => setPaused((v) => !v)}
+                    className="p-1 rounded-lg hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                    aria-label={paused ? "Resume paving motion" : "Pause paving motion"}
+                    title={paused ? "Resume paving motion" : "Pause paving motion"}
+                  >
+                    {paused ? <Play className="w-3.5 h-3.5 text-[#003580]" /> : <Pause className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+
+                {/* Overlaid Bottom-Right Live Kinetic Status Indicator */}
+                <div className="px-3 py-1.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md flex items-center gap-2 font-mono text-[10px] sm:text-[11px] font-semibold text-[#0A1128]">
+                  <span ref={statusDotRef} className="w-2 h-2 rounded-xs bg-[#003580] animate-pulse" />
+                  <span ref={statusBadgeRef}>ASSEMBLING: 0%</span>
+                </div>
+              </div>
+
             </div>
           </div>
 
         </div>
+
+        {/* Global Scroll Cue at bottom edge */}
+        <div className="w-full flex items-center justify-between pt-2 border-t border-slate-200/60 font-mono text-[11px] text-slate-500">
+          <div className="flex items-center gap-2 text-[#003580] font-bold">
+            <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
+            <span className="uppercase tracking-wider">SCROLL TO ASSEMBLE PAVING</span>
+          </div>
+          <span className="hidden sm:inline text-slate-400">
+            HERRINGBONE SPEC · 60MM &amp; 80MM · SRI LANKA
+          </span>
+        </div>
+
       </div>
     </section>
   );
